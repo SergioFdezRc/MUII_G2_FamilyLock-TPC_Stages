@@ -1,0 +1,2 @@
+mininet==2.3.0.dev6
+git+https://github.com/SergioFdezRc/MUII_G2_FamilyLock_generic_topo.git@main
