@@ -51,8 +51,9 @@ def createGenericTopo(houses = 1):
 		
 if __name__=='__main__':
 	setLogLevel( 'info' )
-	if (len(sys.argv) > 0):
-		createGenericTopo(sys.argv[0])
+	if (len(sys.argv) > 1):
+		createGenericTopo(int(sys.argv[1]))		
 	else:
+		print("No parameters specified, using just one house.")
 		createGenericTopo()
 
