@@ -1,42 +1,63 @@
 from mininet.net import Mininet
 from mininet.node import Controller, RemoteController, Node
-from mininet.log import setLogLevel, info
 from mininet.cli import CLI
-CONTROLLER_IP = '127.0.0.1'
+from mininet.log import setLogLevel, info
+from mininet.link import Link, Intf
 
+import sys
+import numpy
 
-class smallStage(Mininet):
+# TODO this traffic creator doesnt work
+def createTraffic(matrix, hosts):
+	for s in range(0, len(hosts)):
+		hosts[s].cmdPrint("iperf -s -u -i 1 -y C >> iperfServers.csv &")
+		for c in range(0, len(hosts)):
+			if hosts[s] != hosts[c]:
+				hosts[c].cmdPrint("iperf -c "+s.IP()+" -u -b "+matrix[s][c]+" -t 10 -i 1 -y C >> iperfClients.csv &")
 
-    def __init__(self):
-        Mininet.__init__(self, topo=None, build=False)
-        self.addController('c0', controller=RemoteController, ip=CONTROLLER_IP, port=6633)
-        _h1 = self.addHost("h1", ip='10.0.0.1')
-        _h4 = self.addHost("h4", ip='10.0.0.2')
+def createGenericTopo(houses = 1):
+	
+	net = Mininet(topo = None, build = False)
+	
+	net.addController('controller', controller = RemoteController, ip = '127.0.0.1', port = 6633)
 
-        _s1 = self.addSwitch("s1")
-        _s2 = self.addSwitch("s2")
-        _s3 = self.addSwitch("s3")
-        _s4 = self.addSwitch("s4")
+	hosts, switches = [], []
 
-        self.addLink(_h1, _s1)
-        self.addLink(_h4, _s4)
+	gs = net.addSwitch('gs0')
 
-        self.addLink(_s1, _s2)
-        self.addLink(_s1, _s3)
-        self.addLink(_s1, _s4)
+	for house in range(houses):
+		s = net.addSwitch('s' + str((len(switches) + 1)))
+		switches.append(s)
 
-        self.addLink(_s2, _s3)
-        self.addLink(_s2, _s4)
+		net.addLink(s, gs)
 
-        self.addLink(_s3, _s4)
-        self.start()
-        CLI(self)
+		for host in range(1, 5):
+			h = net.addHost('h' + str((len(hosts) + 1)))
+			hosts.append(h)
+		
+			# Add Link
+			net.addLink(h,s)
+
+	server = net.addHost('server1')
+	net.addLink(server, gs)
+
+	matrix = numpy.ones((len(hosts), len(hosts)))
+	numpy.fill_diagonal(matrix, 0)
+
+	net.start()
+
+	CLI(net)
+	createTraffic(matrix, hosts)
+	
+	net.stop()
+
 
 
 if __name__ == '__main__':
-    setLogLevel('info')
-    ring_topo = smallStage()
+	setLogLevel('info')
 
-#     meter regla de flood en todos los switches
-# debemos añadir la regla de action normal para que utilice el protocolo IP, y no solo el ARP
-# topos = {'ring_topo': (lambda: ring_topo())}
+	createGenericTopo(houses = 10)
+	# ring_topo = mediumStage()
+	# meter regla de flood en todos los switches
+	# debemos añadir la regla de action normal para que utilice el protocolo IP, y no solo el ARP
+	# topos = {'ring_topo': (lambda: ring_topo())}
