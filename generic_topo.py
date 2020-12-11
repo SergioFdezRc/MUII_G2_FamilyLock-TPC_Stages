@@ -7,12 +7,11 @@ from mininet.link import Link, Intf
 import sys
 import numpy
 
-def createTraffic(matrix, hosts):
-	for s in range(0, len(hosts)):
-		hosts[s].cmdPrint("iperf -s -u -i 1 -y C >> iperfServers.csv &")
-		for c in range(0, len(hosts)):
-			if hosts[s] != hosts[c]:
-				hosts[c].cmdPrint("iperf -c "+s.IP()+" -u -b "+matrix[s][c]+" -t 10 -i 1 -y C >> iperfClients.csv &")
+def createTraffic(hosts, server):
+	server.cmdPrint("iperf -s -u -i 1 -y C &")
+	for c in range(0, len(hosts)):
+		server.cmdPrint("iperf -c "+hosts[c].IP()+" -u -b 1 -t 10 -i 1 -y C >> iperfServer.csv &")
+		hosts[c].cmdPrint("iperf -c "+server.IP()+" -u -b 1 -t 10 -i 1 -y C >> iperf.csv &")
 
 def createGenericTopo(houses = 1):
 	
@@ -39,13 +38,13 @@ def createGenericTopo(houses = 1):
 			# Add Link
 			net.addLink(h,s)
 
-	matrix = numpy.ones((len(hosts), len(hosts)))
-	numpy.fill_diagonal(matrix, 0)
+	#matrix = numpy.ones((len(hosts), len(hosts)))
+	#numpy.fill_diagonal(matrix, 0)
 
 	net.start()
 
 	CLI(net)
-	createTraffic(matrix, hosts)
+	createTraffic(hosts, server)
 	
 	net.stop()
 		
