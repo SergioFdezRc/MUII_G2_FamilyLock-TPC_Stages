@@ -61,7 +61,6 @@ def createGenericTopo(houses = 1):
 		net.addLink(s,gs)
 
 		for host in range(1, 5):
-			print(str(house) + " - " + str(host))
 			h = net.addHost('h' + str((len(hosts) + 1)))
 			hosts.append(h)
 		
