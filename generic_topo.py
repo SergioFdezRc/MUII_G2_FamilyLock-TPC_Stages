@@ -5,17 +5,43 @@ from mininet.log import setLogLevel, info
 from mininet.link import Link, Intf
 
 import sys
-import numpy
+
+def createTest(hosts, server, bandwith, test_name):
+	client_filename = "iperfClient" + test_name + ".csv"
+	server_filename = "iperfServer" + test_name + ".csv"
+	for client in hosts:
+		# From client to server
+		client.cmdPrint("iperf -c "+ server.IP()+" -u -b " + str(bandwith) + " -t 10 -i 1 -y C >> " + client_filename + " &")
+		# From server to client (Reverse -> -R)
+		server.cmdPrint("iperf -c "+ client.IP()+" -u -b " + str(bandwith) + " -t 10 -i 1 -y C >> " + server_filename + " &")
 
 def createTraffic(hosts, server):
-	server.cmdPrint("iperf -s -u -i 1 -y C &")
-	for c in range(0, len(hosts)):
-		server.cmdPrint("iperf -c "+hosts[c].IP()+" -u -b 1 -t 10 -i 1 -y C >> iperfServer.csv &")
-		hosts[c].cmdPrint("iperf -c "+server.IP()+" -u -b 1 -t 10 -i 1 -y C >> iperf.csv &")
+	server.cmdPrint("iperf -s -u -y C &")
+	# Test 1 (Bandwith 10 MB/s, Time 10 sec, Interval 0 sec)
+	print("Creating test 1")
+	createTest(hosts, server, 10, "Test1")
+	# Test 2 (Bandwith 100 MB/s, Time 10 sec, Interval 0 sec)
+	print("Creating test 2")
+	createTest(hosts, server, 100, "Test2")
+	# Test 3 (Bandwith 1000 MB/s, Time 10 sec, Interval 0 sec)
+	print("Creating test 3")
+	createTest(hosts, server, 1000, "Test3")
+	'''
+	# Test 4 (Bandwith 10 MB/s, Time 10 sec, Interval 1 sec)
+	print("Creating test 4")
+	createTest(hosts, server, 10, 10, 1, "Test4")
+	# Test 5 (Bandwith 100 MB/s, Time 10 sec, Interval 1 sec)
+	print("Creating test 5")
+	createTest(hosts, server, 100, 10, 1, "Test5")
+	# Test 6 (Bandwith 1000 MB/s, Time 10 sec, Interval 1 sec)
+	print("Creating test 6")
+	createTest(hosts, server, 1000, 10, 1, "Test6")
+	'''
+	
 
 def createGenericTopo(houses = 1):
 	
-	net = Mininet(topo = None, build = False)
+	net = Mininet(topo = None, build = False, autoSetMacs = True)
 	
 	net.addController('controller', controller = RemoteController, ip = '127.0.0.1', port = 6633)
 
@@ -37,9 +63,6 @@ def createGenericTopo(houses = 1):
 		
 			# Add Link
 			net.addLink(h,s)
-
-	#matrix = numpy.ones((len(hosts), len(hosts)))
-	#numpy.fill_diagonal(matrix, 0)
 
 	net.start()
 
