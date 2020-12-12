@@ -7,9 +7,9 @@ import time
 
 import sys
 
-def createTest(hosts, server, bandwith, test_name):
-	server_filename = "iperfServer" + test_name + ".csv"
-	client_filename = "iperfClient" + test_name + ".csv"
+def createTest(hosts, server, bandwith, test_name, folder_name):
+	server_filename = folder_name + "iperfServer" + test_name + ".csv"
+	client_filename = folder_name + "iperfClient" + test_name + ".csv"
 	
 	# From server to client
 	server.cmdPrint("iperf -s -u -y C >> " + server_filename + " &")
@@ -17,29 +17,37 @@ def createTest(hosts, server, bandwith, test_name):
 	for client in hosts:
 		# From client to server
 		client.cmdPrint("iperf -c "+ server.IP()+" -u -t 10 -i 1 -y C >> " + client_filename + " &")
+		# Wait (0.1 * num_host) sec
+		time.sleep(len(hosts)*4/100)
 
-def createTraffic(hosts, server):
-	#server.cmdPrint("iperf -s -u -y C &")
-	# Test 1 (Bandwith 10 MB/s, Time 10 sec, Interval 0 sec)
+def createTraffic(houses, hosts, server):
+
+	folder_name = ""
+
+	if houses == 1:
+		folder_name = "stage-small/"
+	elif houses == 50:
+		folder_name = "stage-medium/"
+	elif houses == 250:
+		folder_name = "stage-big/"
+	
+	# Test 1 (Bandwith 10 MB/s, Time 10 sec, Interval 1 sec)
 	print("Creating test 1")
-	createTest(hosts, server, "1m", "Test1")
-	'''
-	# Test 2 (Bandwith 100 MB/s, Time 10 sec, Interval 0 sec)
+	createTest(hosts, server, "10m", "Test1", folder_name)
+
+	time.sleep(3)
+
+	# Test 2 (Bandwith 100 MB/s, Time 10 sec, Interval 1 sec)
 	print("Creating test 2")
-	createTest(hosts, server, 100, "Test2")
-	# Test 3 (Bandwith 1000 MB/s, Time 10 sec, Interval 0 sec)
+	createTest(hosts, server, "100m", "Test2",folder_name)
+
+	time.sleep(3)
+
+	# Test 3 (Bandwith 1000 MB/s, Time 10 sec, Interval 1 sec)
 	print("Creating test 3")
-	createTest(hosts, server, 1000, "Test3")
-	# Test 4 (Bandwith 10 MB/s, Time 10 sec, Interval 1 sec)
-	print("Creating test 4")
-	createTest(hosts, server, 10, 10, 1, "Test4")
-	# Test 5 (Bandwith 100 MB/s, Time 10 sec, Interval 1 sec)
-	print("Creating test 5")
-	createTest(hosts, server, 100, 10, 1, "Test5")
-	# Test 6 (Bandwith 1000 MB/s, Time 10 sec, Interval 1 sec)
-	print("Creating test 6")
-	createTest(hosts, server, 1000, 10, 1, "Test6")
-	'''
+	createTest(hosts, server, "1000m", "Test3", folder_name)
+
+	time.sleep(3)
 	
 
 def createGenericTopo(houses = 1):
@@ -67,9 +75,15 @@ def createGenericTopo(houses = 1):
 			# Add Link
 			net.addLink(h,s)
 
+	print("Starting simulation")
 	net.start()
 
-	createTraffic(hosts, server)
+	print("Waiting for connection")
+	net.waitConnected()
+
+	print("Creating traffic")
+	createTraffic(houses, hosts, server)
+
 	CLI(net)
 	
 	net.stop()
