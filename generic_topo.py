@@ -7,7 +7,7 @@ import time
 
 import sys
 
-def createTest(hosts, server, bandwith, test_name, folder_name):
+def createTest(hosts, server, bandwidth, test_name, folder_name):
 	server_filename = folder_name + "iperfServer" + test_name + ".csv"
 	client_filename = folder_name + "iperfClient" + test_name + ".csv"
 	
@@ -16,7 +16,7 @@ def createTest(hosts, server, bandwith, test_name, folder_name):
 
 	for client in hosts:
 		# From client to server
-		client.cmdPrint("iperf -c "+ server.IP()+" -u -t 10 -i 1 -y C >> " + client_filename + " &")
+		client.cmdPrint("iperf -c "+ server.IP()+" -u -b " + bandwidth + " -t 10 -i 1 -y C >> " + client_filename + " &")
 		# Wait (0.1 * num_host) sec
 		time.sleep(len(hosts)*4/100)
 
@@ -35,19 +35,17 @@ def createTraffic(houses, hosts, server):
 	print("Creating test 1")
 	createTest(hosts, server, "10m", "Test1", folder_name)
 
-	time.sleep(3)
+	time.sleep(60)
 
 	# Test 2 (Bandwith 100 MB/s, Time 10 sec, Interval 1 sec)
 	print("Creating test 2")
 	createTest(hosts, server, "100m", "Test2",folder_name)
 
-	time.sleep(3)
+	time.sleep(60)
 
 	# Test 3 (Bandwith 1000 MB/s, Time 10 sec, Interval 1 sec)
 	print("Creating test 3")
 	createTest(hosts, server, "1000m", "Test3", folder_name)
-
-	time.sleep(3)
 	
 
 def createGenericTopo(houses = 1):
