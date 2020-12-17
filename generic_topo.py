@@ -11,6 +11,9 @@ def createTest(hosts, server, bandwidth, test_name, folder_name):
 	server_filename = folder_name + "iperfServer" + test_name + ".csv"
 	client_filename = folder_name + "iperfClient" + test_name + ".csv"
 	
+	for client in hosts:
+		client.cmdPrint("ping -c3 " + server.IP())
+	
 	# From server to client
 	server.cmdPrint("iperf -s -u -y C >> " + server_filename + " &")
 
@@ -77,9 +80,6 @@ def createGenericTopo(houses = 1, test = 1):
 
 	print("Waiting for connection")
 	net.waitConnected()
-
-	print("Ping All")
-	net.pingAll()
 
 	print("Creating traffic")
 	createTraffic(test, houses, hosts, server)
