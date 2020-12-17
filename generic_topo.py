@@ -20,7 +20,7 @@ def createTest(hosts, server, bandwidth, test_name, folder_name):
 		# Wait (0.1 * num_host) sec
 		time.sleep(len(hosts)*4/100)
 
-def createTraffic(houses, hosts, server):
+def createTraffic(test, houses, hosts, server):
 
 	folder_name = ""
 
@@ -31,24 +31,23 @@ def createTraffic(houses, hosts, server):
 	elif houses == 250:
 		folder_name = "stage-big/"
 	
-	# Test 1 (Bandwith 10 MB/s, Time 10 sec, Interval 1 sec)
-	print("Creating test 1")
-	createTest(hosts, server, "10m", "Test1", folder_name)
+	if test == 1:
+		# Test 1 (Bandwith 10 MB/s, Time 10 sec, Interval 1 sec)
+		print("Creating test 1")
+		createTest(hosts, server, "10m", "Test1", folder_name)
+		
+	elif test == 2:
+		# Test 2 (Bandwith 100 MB/s, Time 10 sec, Interval 1 sec)
+		print("Creating test 2")
+		createTest(hosts, server, "100m", "Test2",folder_name)
 
-	time.sleep(60)
-
-	# Test 2 (Bandwith 100 MB/s, Time 10 sec, Interval 1 sec)
-	print("Creating test 2")
-	createTest(hosts, server, "100m", "Test2",folder_name)
-
-	time.sleep(60)
-
-	# Test 3 (Bandwith 1000 MB/s, Time 10 sec, Interval 1 sec)
-	print("Creating test 3")
-	createTest(hosts, server, "1000m", "Test3", folder_name)
+	elif test == 3:
+		# Test 3 (Bandwith 1000 MB/s, Time 10 sec, Interval 1 sec)
+		print("Creating test 3")
+		createTest(hosts, server, "1000m", "Test3", folder_name)
 	
 
-def createGenericTopo(houses = 1):
+def createGenericTopo(houses = 1, test = 1):
 	
 	net = Mininet(topo = None, build = False, autoSetMacs = True)
 	
@@ -79,8 +78,11 @@ def createGenericTopo(houses = 1):
 	print("Waiting for connection")
 	net.waitConnected()
 
+	print("Ping All")
+	net.pingAll()
+
 	print("Creating traffic")
-	createTraffic(houses, hosts, server)
+	createTraffic(test, houses, hosts, server)
 
 	CLI(net)
 	
@@ -89,7 +91,7 @@ def createGenericTopo(houses = 1):
 if __name__=='__main__':
 	setLogLevel( 'info' )
 	if (len(sys.argv) > 1):
-		createGenericTopo(int(sys.argv[1]))		
+		createGenericTopo(int(sys.argv[1]), int(sys.argv[2]))		
 	else:
 		print("No parameters specified, using just one house.")
 		createGenericTopo()
