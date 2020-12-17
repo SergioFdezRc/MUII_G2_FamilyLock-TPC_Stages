@@ -15,11 +15,11 @@ def createTest(hosts, server, bandwidth, test_name, folder_name):
 		client.cmdPrint("ping -c3 " + server.IP())
 	
 	# From server to client
-	server.cmdPrint("iperf -s -u -y C >> " + server_filename + " &")
+	server.cmdPrint("iperf -u -s -y C >> " + server_filename + " &")
 
 	for client in hosts:
 		# From client to server
-		client.cmdPrint("iperf -c "+ server.IP()+" -u -b " + bandwidth + " -t 10 -i 1 -y C >> " + client_filename + " &")
+		client.cmdPrint("iperf -u -c "+ server.IP()+" -b " + bandwidth + " -t 10 -i 1 -y C >> " + client_filename + " &")
 		# Wait (0.1 * num_host) sec
 		time.sleep(len(hosts)*4/100)
 
