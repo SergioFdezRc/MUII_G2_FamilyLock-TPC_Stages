@@ -11,6 +11,7 @@ def createTest(hosts, server, bandwidth, test_name, folder_name):
 	server_filename = folder_name + "iperfServer" + test_name + ".csv"
 	client_filename = folder_name + "iperfClient" + test_name + ".csv"
 	
+	# Ping to discovery the topology
 	for client in hosts:
 		client.cmdPrint("ping -c3 " + server.IP())
 	
@@ -32,7 +33,7 @@ def createTraffic(test, houses, hosts, server):
 	elif houses == 50:
 		folder_name = "stage-medium/"
 	elif houses == 250:
-		folder_name = "stage-big/"
+		folder_name = "stage-big/" 
 	
 	if test == 1:
 		# Test 1 (Bandwith 10 MB/s, Time 10 sec, Interval 1 sec)
